@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0-next.1
+
+### Minor Changes
+
+- Pass correct props to custom ToolTip and StepNumber components
+
 ## 3.2.1
 
 ### Patch Changes
