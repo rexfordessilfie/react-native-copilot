@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0-next.2
+
+### Patch Changes
+
+- Optional copilot props in walkthroughable
+
 ## 3.3.0-next.1
 
 ### Minor Changes
