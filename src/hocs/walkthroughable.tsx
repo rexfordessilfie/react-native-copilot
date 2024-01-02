@@ -1,20 +1,21 @@
-import React, { type FunctionComponent } from "react";
+import React from "react";
 import { type NativeMethods } from "react-native/types";
 
-type PropsWithCopilot<P> = P & {
-  copilot: {
+interface WithCopilot {
+  copilot?: {
     ref?: React.RefObject<NativeMethods>;
     onLayout?: () => void;
   };
-};
+}
+
+type PropsWithCopilot<P> = P & WithCopilot;
 
 export function walkthroughable<P = any>(
   WrappedComponent: React.ComponentType<P>
 ) {
-  const Component: FunctionComponent<PropsWithCopilot<P>> = ({
-    copilot,
-    ...props
-  }) => <WrappedComponent {...(copilot as any)} {...props} />;
+  const Component = ({ copilot, ...props }: PropsWithCopilot<P>) => {
+    return <WrappedComponent {...(copilot as any)} {...props} />;
+  };
 
   Component.displayName = "Walkthroughable";
 
