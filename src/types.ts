@@ -16,6 +16,7 @@ export interface Step {
   wrapperRef: React.RefObject<NativeMethods>;
   measure: () => Promise<LayoutRectangle>;
   text: string;
+  data?: Record<string, any>;
 }
 
 export interface CopilotContext {
