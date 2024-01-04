@@ -64,7 +64,7 @@ function App() {
       <CopilotStep
         text="Hey! This is the first step of the tour 2!"
         order={2}
-        name="openApp"
+        name="tour2Openapp"
         tourKey="tour2"
       >
         <WalkthroughableText style={styles.title}>
@@ -132,20 +132,19 @@ function App() {
         <CopilotStep
           text="Here is an item in the corner of the screen."
           order={2}
-          name="thirdText"
+          name="tour2Airplane"
           tourKey="tour2"
         >
           <WalkthroughableText style={styles.tabItem}>
-            <Ionicons name="apps" size={25} color="#888" />
+            <Ionicons
+              style={styles.tabItem}
+              name="airplane"
+              size={25}
+              color="#888"
+            />
           </WalkthroughableText>
         </CopilotStep>
 
-        <Ionicons
-          style={styles.tabItem}
-          name="airplane"
-          size={25}
-          color="#888"
-        />
         <Ionicons
           style={styles.tabItem}
           name="ios-globe"
