@@ -21,20 +21,33 @@ const WalkthroughableImage = walkthroughable(Image);
 
 function App() {
   const { start, copilotEvents } = useCopilot();
+  const { start: start2, copilotEvents: copilotEvents2 } = useCopilot("tour2");
   const [secondStepActive, setSecondStepActive] = useState(true);
-  const [lastEvent, setLastEvent] = useState(null);
+  const [lastEvent, setLastEvent] = useState();
 
   useEffect(() => {
-    copilotEvents.on("stepChange", (step) => {
-      setLastEvent(`stepChange: ${step.name}`);
+    copilotEvents?.on("stepChange", (step) => {
+      setLastEvent(`stepChange: ${step?.name ?? ""}`);
     });
-    copilotEvents.on("start", () => {
+    copilotEvents?.on("start", () => {
       setLastEvent(`start`);
     });
-    copilotEvents.on("stop", () => {
+    copilotEvents?.on("stop", () => {
       setLastEvent(`stop`);
     });
   }, [copilotEvents]);
+
+  useEffect(() => {
+    copilotEvents2?.on("stepChange", (step) => {
+      setLastEvent(`stepChange: ${step?.name ?? ""}`);
+    });
+    copilotEvents2?.on("start", () => {
+      setLastEvent(`start`);
+    });
+    copilotEvents2?.on("stop", () => {
+      setLastEvent(`stop`);
+    });
+  }, [copilotEvents2]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,6 +60,18 @@ function App() {
           {'Welcome to the demo of\n"React Native Copilot"'}
         </WalkthroughableText>
       </CopilotStep>
+
+      <CopilotStep
+        text="Hey! This is the first step of the tour 2!"
+        order={2}
+        name="openApp"
+        tourKey="tour2"
+      >
+        <WalkthroughableText style={styles.title}>
+          {'Welcome to the demo 2 of\n"React Native Copilot"'}
+        </WalkthroughableText>
+      </CopilotStep>
+
       <View style={styles.middleView}>
         <CopilotStep
           active={secondStepActive}
@@ -65,15 +90,29 @@ function App() {
           <Text>Profile photo step activated?</Text>
           <View style={{ flexGrow: 1 }} />
           <Switch
-            onValueChange={(secondStepActive) =>
-              setSecondStepActive(secondStepActive)
-            }
+            onValueChange={(secondStepActive) => {
+              setSecondStepActive(secondStepActive);
+            }}
             value={secondStepActive}
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={() => start()}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            start();
+          }}
+        >
           <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            start2();
+          }}
+        >
+          <Text style={styles.buttonText}>START THE 2nd TUTORIAL!</Text>
         </TouchableOpacity>
         <View style={styles.eventContainer}>
           <Text>{lastEvent && `Last event: ${lastEvent}`}</Text>
@@ -84,6 +123,17 @@ function App() {
           text="Here is an item in the corner of the screen."
           order={3}
           name="thirdText"
+        >
+          <WalkthroughableText style={styles.tabItem}>
+            <Ionicons name="apps" size={25} color="#888" />
+          </WalkthroughableText>
+        </CopilotStep>
+
+        <CopilotStep
+          text="Here is an item in the corner of the screen."
+          order={2}
+          name="thirdText"
+          tourKey="tour2"
         >
           <WalkthroughableText style={styles.tabItem}>
             <Ionicons name="apps" size={25} color="#888" />
