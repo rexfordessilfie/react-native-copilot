@@ -18,7 +18,7 @@ import {
   type LayoutRectangle,
   type ViewStyle,
 } from "react-native";
-import { useCopilot } from "../contexts/CopilotProvider";
+import { useCopilot } from "../hooks/useCopilot";
 import type { CopilotOptions } from "../types";
 import { StepNumber } from "./default-ui/StepNumber";
 import { Tooltip } from "./default-ui/Tooltip";
@@ -30,7 +30,9 @@ import {
   styles,
 } from "./style";
 
-type Props = CopilotOptions;
+type Props = CopilotOptions & {
+  tourKey: string;
+};
 
 const noop = () => {};
 
@@ -48,6 +50,7 @@ export interface CopilotModalHandle {
 export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
   function CopilotModal(
     {
+      tourKey,
       easing = Easing.elastic(0.7),
       animationDuration = 400,
       tooltipComponent: TooltipComponent = Tooltip,
@@ -83,7 +86,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       isLastStep,
       isFirstStep,
       currentStepNumber,
-    } = useCopilot();
+    } = useCopilot(tourKey);
     const [tooltipStyles, setTooltipStyles] = useState({});
     const [arrowStyles, setArrowStyles] = useState({});
     const [animatedValues] = useState({

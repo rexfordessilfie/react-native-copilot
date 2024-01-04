@@ -1,109 +1,139 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useReducer, useState } from "react";
 import { type Step, type StepsMap } from "../types";
 
 type Action =
   | {
       type: "register";
+      key: string;
       step: Step;
     }
   | {
       type: "unregister";
+      key: string;
       stepName: string;
     };
 
 export const useStepsMap = () => {
-  const [currentStep, setCurrentStepState] = useState<Step | undefined>(
-    undefined
-  );
+  const [currentStepState, setCurrentStepState] = useState<
+    Record<string, Step | undefined>
+  >({});
+
   const [steps, dispatch] = useReducer((state: StepsMap, action: Action) => {
     switch (action.type) {
       case "register":
         return {
           ...state,
-          [action.step.name]: action.step,
+          [action.key]: {
+            ...state[action.key],
+            [action.step.name]: action.step,
+          },
         };
       case "unregister": {
-        const { [action.stepName]: _, ...rest } = state;
-        return rest;
+        const {
+          [action.key]: { [action.stepName]: _, ...rest },
+        } = state;
+        return {
+          ...state,
+          [action.key]: rest,
+        };
       }
       default:
         return state;
     }
   }, {});
 
-  const orderedSteps = useMemo(
-    () => Object.values(steps).sort((a, b) => a.order - b.order),
+  const getOrderedSteps = useCallback(
+    (tourKey: string) => {
+      const _steps = steps[tourKey];
+
+      if (!_steps) {
+        return [];
+      }
+      return Object.values(_steps).sort((a, b) => a.order - b.order);
+    },
     [steps]
   );
 
   const stepIndex = useCallback(
-    (step = currentStep) =>
+    (tourKey: string, step = currentStepState[tourKey]) =>
       step
-        ? orderedSteps.findIndex(
+        ? getOrderedSteps(tourKey).findIndex(
             (stepCandidate) => stepCandidate.order === step.order
           )
         : -1,
-    [currentStep, orderedSteps]
+    [currentStepState, getOrderedSteps]
   );
 
-  const currentStepNumber = useMemo(
-    (step = currentStep) => stepIndex(step) + 1,
-    [currentStep, stepIndex]
+  const getCurrentStepNumber = useCallback(
+    (key: string, step = currentStepState[key]) => stepIndex(key, step) + 1,
+    [currentStepState, stepIndex]
   );
 
-  const getFirstStep = useCallback(() => orderedSteps[0], [orderedSteps]);
+  const getFirstStep = useCallback(
+    (key: string) => getOrderedSteps(key)[0],
+    [getOrderedSteps]
+  );
 
   const getLastStep = useCallback(
-    () => orderedSteps[orderedSteps.length - 1],
-    [orderedSteps]
+    (key: string) => {
+      const _orderedSteps = getOrderedSteps(key);
+      return _orderedSteps[_orderedSteps.length - 1];
+    },
+    [getOrderedSteps]
   );
 
   const getPrevStep = useCallback(
-    (step = currentStep) => step && orderedSteps[stepIndex(step) - 1],
-    [currentStep, stepIndex, orderedSteps]
+    (key: string, step = currentStepState[key]) => {
+      const _orderedSteps = getOrderedSteps(key);
+      return step && _orderedSteps[stepIndex(key, step) - 1];
+    },
+    [currentStepState, getOrderedSteps, stepIndex]
   );
 
   const getNextStep = useCallback(
-    (step = currentStep) => step && orderedSteps[stepIndex(step) + 1],
-    [currentStep, stepIndex, orderedSteps]
+    (key: string, step = currentStepState[key]) => {
+      const _orderedSteps = getOrderedSteps(key);
+      return step && _orderedSteps[stepIndex(key, step) + 1];
+    },
+    [currentStepState, getOrderedSteps, stepIndex]
   );
 
   const getNthStep = useCallback(
-    (n: number) => orderedSteps[n - 1],
-    [orderedSteps]
+    (key: string, n: number) => getOrderedSteps(key)[n - 1],
+    [getOrderedSteps]
   );
 
-  const isFirstStep = useMemo(
-    () => currentStep === getFirstStep(),
-    [currentStep, getFirstStep]
+  const getIsFirstStep = useCallback(
+    (key: string) => currentStepState[key] === getFirstStep(key),
+    [currentStepState, getFirstStep]
   );
 
-  const isLastStep = useMemo(
-    () => currentStep === getLastStep(),
-    [currentStep, getLastStep]
+  const getIsLastStep = useCallback(
+    (key: string) => currentStepState[key] === getLastStep(key),
+    [currentStepState, getLastStep]
   );
 
-  const registerStep = useCallback((step: Step) => {
-    dispatch({ type: "register", step });
+  const registerStep = useCallback((key: string, step: Step) => {
+    dispatch({ type: "register", step, key });
   }, []);
 
-  const unregisterStep = useCallback((stepName: string) => {
-    dispatch({ type: "unregister", stepName });
+  const unregisterStep = useCallback((key: string, stepName: string) => {
+    dispatch({ type: "unregister", key, stepName });
   }, []);
 
   return {
-    currentStepNumber,
     getFirstStep,
     getLastStep,
     getPrevStep,
     getNextStep,
     getNthStep,
-    isFirstStep,
-    isLastStep,
-    currentStep,
+    getIsFirstStep,
+    getIsLastStep,
+    currentStepState,
     setCurrentStepState,
     steps,
     registerStep,
     unregisterStep,
+    getCurrentStepNumber,
   };
 };

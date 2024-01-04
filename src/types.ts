@@ -37,7 +37,7 @@ export type SvgMaskPathFunction = (args: {
   step: Step;
 }) => string;
 
-export type StepsMap = Record<string, Step>;
+export type StepsMap = Record<string, Record<string, Step>>;
 
 export type EasingFunction = (value: number) => number;
 
@@ -94,28 +94,50 @@ export interface CopilotOptions {
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Events = {
+  register: Step | undefined;
   start: undefined;
   stop: undefined;
   stepChange: Step | undefined;
 };
 
 export interface CopilotContextType {
-  registerStep: (step: Step) => void;
-  unregisterStep: (stepName: string) => void;
-  currentStep: Step | undefined;
+  tourKey: string;
+  registerStep: (key: string, step: Step) => void;
+  unregisterStep: (key: string, stepName: string) => void;
+  getCurrentStep: (key: string) => Step | undefined;
   start: (
+    key: string,
     fromStep?: string,
     suppliedScrollView?: ScrollView | null
   ) => Promise<void>;
+  stop: (key: string) => Promise<void>;
+  goToNext: (key: string) => Promise<void>;
+  goToNth: (key: string, n: number) => Promise<void>;
+  goToPrev: (key: string) => Promise<void>;
+  visible: Record<string, boolean>;
+  copilotEvents: Record<string, Emitter<Events>>;
+  getIsFirstStep: (key: string) => boolean;
+  getIsLastStep: (key: string) => boolean;
+  getCurrentStepNumber: (key: string) => number;
+  setTourKey: (key: string) => void;
+}
+
+export interface UseCopilotReturn {
+  tourKey: string;
+  start: (fromStep?: string) => Promise<void>;
   stop: () => Promise<void>;
+  getCurrentStep: () => Step | undefined;
+  currentStep: Step | undefined;
+  copilotEvents: Emitter<Events>;
   goToNext: () => Promise<void>;
   goToNth: (n: number) => Promise<void>;
   goToPrev: () => Promise<void>;
   visible: boolean;
-  copilotEvents: Emitter<Events>;
   isFirstStep: boolean;
   isLastStep: boolean;
   currentStepNumber: number;
+  registerStep: (step: Step) => void;
+  unregisterStep: (stepName: string) => void;
 }
 
 export interface StepNumberProps {
