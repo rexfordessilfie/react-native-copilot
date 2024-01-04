@@ -3,6 +3,7 @@
   "exclude": ["dist"],
   "include": ["src"],
   "compilerOptions": {
+    "rootDir": ".",
     "paths": {
       "@rexfordessilfie/react-native-copilot": ["./src/index.ts"]
     },
