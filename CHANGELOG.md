@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0-next.4
+
+### Patch Changes
+
+- Add support for multi tours
+
 ## 3.3.0-next.2
 
 ### Patch Changes
