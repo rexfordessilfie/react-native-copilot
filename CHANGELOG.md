@@ -1,5 +1,11 @@
 # Change Log
 
+## 3.3.0-next.5
+
+### Patch Changes
+
+- Restore scroll view support
+
 ## 3.3.0-next.4
 
 ### Patch Changes
