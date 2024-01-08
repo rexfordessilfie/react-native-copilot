@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
+  Dimensions,
   Image,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -24,6 +26,8 @@ function App() {
   const { start: start2, copilotEvents: copilotEvents2 } = useCopilot("tour2");
   const [secondStepActive, setSecondStepActive] = useState(true);
   const [lastEvent, setLastEvent] = useState();
+
+  const ref = React.useRef(null);
 
   useEffect(() => {
     copilotEvents?.on("stepChange", (step) => {
@@ -50,74 +54,87 @@ function App() {
   }, [copilotEvents2]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <CopilotStep
-        text="Hey! This is the first step of the tour!"
-        order={1}
-        name="openApp"
-      >
-        <WalkthroughableText style={styles.title}>
-          {'Welcome to the demo of\n"React Native Copilot"'}
-        </WalkthroughableText>
-      </CopilotStep>
-
-      <CopilotStep
-        text="Hey! This is the first step of the tour 2!"
-        order={2}
-        name="tour2Openapp"
-        tourKey="tour2"
-      >
-        <WalkthroughableText style={styles.title}>
-          {'Welcome to the demo 2 of\n"React Native Copilot"'}
-        </WalkthroughableText>
-      </CopilotStep>
-
-      <View style={styles.middleView}>
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView ref={ref} contentContainerStyle={styles.container}>
         <CopilotStep
-          active={secondStepActive}
-          text="Here goes your profile picture!"
-          order={2}
-          name="secondText"
+          text="Hey! This is the first step of the tour!"
+          order={1}
+          name="openApp"
         >
-          <WalkthroughableImage
-            source={{
-              uri: "https://pbs.twimg.com/profile_images/527584017189982208/l3wwN-l-_400x400.jpeg",
-            }}
-            style={styles.profilePhoto}
-          />
+          <WalkthroughableText style={styles.title}>
+            {'Welcome to the demo of\n"React Native Copilot"'}
+          </WalkthroughableText>
         </CopilotStep>
-        <View style={styles.activeSwitchContainer}>
-          <Text>Profile photo step activated?</Text>
-          <View style={{ flexGrow: 1 }} />
-          <Switch
-            onValueChange={(secondStepActive) => {
-              setSecondStepActive(secondStepActive);
+
+        <CopilotStep
+          text="Hey! This is the first step of the tour 2!"
+          order={2}
+          name="tour2Openapp"
+          tourKey="tour2"
+        >
+          <WalkthroughableText style={styles.title}>
+            {'Welcome to the demo 2 of\n"React Native Copilot"'}
+          </WalkthroughableText>
+        </CopilotStep>
+
+        <View style={styles.middleView}>
+          <CopilotStep
+            active={secondStepActive}
+            text="Here goes your profile picture!"
+            order={2}
+            name="secondText"
+          >
+            <WalkthroughableImage
+              source={{
+                uri: "https://pbs.twimg.com/profile_images/527584017189982208/l3wwN-l-_400x400.jpeg",
+              }}
+              style={styles.profilePhoto}
+            />
+          </CopilotStep>
+          <View style={styles.activeSwitchContainer}>
+            <Text>Profile photo step activated?</Text>
+            <View style={{ flexGrow: 1 }} />
+            <Switch
+              onValueChange={(secondStepActive) => {
+                setSecondStepActive(secondStepActive);
+              }}
+              value={secondStepActive}
+            />
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              start(undefined, ref.current);
             }}
-            value={secondStepActive}
-          />
+          >
+            <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              start2(undefined, ref.current);
+            }}
+          >
+            <Text style={styles.buttonText}>START THE 2nd TUTORIAL!</Text>
+          </TouchableOpacity>
+          <View style={styles.eventContainer}>
+            <Text>{lastEvent && `Last event: ${lastEvent}`}</Text>
+          </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            start();
-          }}
-        >
-          <Text style={styles.buttonText}>START THE TUTORIAL!</Text>
-        </TouchableOpacity>
+        <View style={{ height: Dimensions.get("screen").height / 2 }} />
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            start2();
-          }}
+        <CopilotStep
+          tourKey="tour2"
+          text="This step is hidden by scroll view"
+          name="hiddenText"
+          order={3}
         >
-          <Text style={styles.buttonText}>START THE 2nd TUTORIAL!</Text>
-        </TouchableOpacity>
-        <View style={styles.eventContainer}>
-          <Text>{lastEvent && `Last event: ${lastEvent}`}</Text>
-        </View>
-      </View>
+          <WalkthroughableText>Text Hidden By Scroll</WalkthroughableText>
+        </CopilotStep>
+      </ScrollView>
       <View style={styles.row}>
         <CopilotStep
           text="Here is an item in the corner of the screen."
@@ -178,7 +195,6 @@ export default AppwithProvider;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     paddingTop: 25,
