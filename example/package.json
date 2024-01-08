@@ -9,7 +9,6 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@rexfordessilfie/react-native-copilot": "*",
     "expo": "~48.0.6",
     "expo-build-properties": "~0.5.1",
     "expo-dev-client": "~2.1.5",
