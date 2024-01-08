@@ -6,6 +6,7 @@ import type {
   ScrollView,
   ViewStyle,
 } from "react-native";
+import { type TourKey, type StepName } from "./utils";
 
 export type WalktroughedComponent = NativeMethods & React.ComponentType<any>;
 
@@ -114,7 +115,7 @@ export interface CopilotContextType {
   goToNext: (key: string) => Promise<void>;
   goToNth: (key: string, n: number) => Promise<void>;
   goToPrev: (key: string) => Promise<void>;
-  visible: Record<string, boolean>;
+  toursStore: ToursStore;
   copilotEvents: Record<string, Emitter<Events>>;
   getIsFirstStep: (key: string) => boolean;
   getIsLastStep: (key: string) => boolean;
@@ -128,7 +129,7 @@ export interface UseCopilotReturn {
   stop: () => Promise<void>;
   getCurrentStep: () => Step | undefined;
   currentStep: Step | undefined;
-  copilotEvents: Emitter<Events>;
+  copilotEvents?: Emitter<Events>;
   goToNext: () => Promise<void>;
   goToNth: (n: number) => Promise<void>;
   goToPrev: () => Promise<void>;
@@ -143,3 +144,41 @@ export interface UseCopilotReturn {
 export interface StepNumberProps {
   currentStepNumber: number;
 }
+
+export type StepsAction =
+  | {
+      type: "register";
+      payload: {
+        tourKey: string;
+        step: Step;
+      };
+    }
+  | {
+      type: "unregister";
+      payload: {
+        tourKey: string;
+        stepName: string;
+      };
+    }
+  | {
+      type: "show" | "hide";
+      payload: {
+        tourKey: string;
+      };
+    }
+  | {
+      type: "step";
+      payload: {
+        tourKey: string;
+        step?: Step;
+      };
+    };
+
+export type ToursStore = Record<
+  TourKey,
+  {
+    currentStep?: Step;
+    steps: Record<StepName, Step>;
+    visible: boolean;
+  }
+>;

@@ -13,13 +13,15 @@ import {
   type CopilotModalHandle,
 } from "../components/CopilotModal";
 import { OFFSET_WIDTH } from "../components/style";
-import { useStepsMap as useSteps } from "../hooks/useStepsMap";
+import { useToursStore } from "../hooks/useToursStore";
 import type {
   CopilotContextType,
   Events,
   CopilotOptions,
   Step,
 } from "../types";
+
+import * as utils from "../utils";
 
 /*
 This is the maximum wait time for the steps to be registered before starting the tutorial
@@ -37,16 +39,17 @@ export const CopilotProvider = ({
   ...rest
 }: PropsWithChildren<CopilotOptions>) => {
   const startTries = useRef(0);
-  const copilotEvents = useRef<Record<string, Emitter<Events>>>({}).current;
+  const copilotEvents = useRef<Record<utils.TourKey, Emitter<Events>>>(
+    {}
+  ).current;
   const modal = useRef<CopilotModalHandle | null>(null);
 
-  const [visible, setVisibility] = useState<Record<string, boolean>>({});
   const [scrollView, setScrollView] = useState<ScrollView | null>(null);
 
-  const [tourKey, setTourKey] = useState<string>("_default");
+  const [tourKey, setTourKey] = useState<utils.TourKey>("_default");
 
   const {
-    currentStepState,
+    getCurrentStep,
     getCurrentStepNumber,
     getFirstStep,
     getPrevStep,
@@ -54,11 +57,13 @@ export const CopilotProvider = ({
     getNthStep,
     getIsFirstStep,
     getIsLastStep,
-    setCurrentStepState,
-    steps,
+    setCurrentStep: _setCurrentStep,
+    toursStore,
     registerStep: _registerStep,
     unregisterStep,
-  } = useSteps();
+    hideTour,
+    showTour,
+  } = useToursStore();
 
   const registerStep = useCallback(
     (key: string, step: Step) => {
@@ -68,16 +73,9 @@ export const CopilotProvider = ({
         copilotEvents[key] = mitt<Events>();
       }
 
-      copilotEvents[key].emit("register", step);
+      copilotEvents[key]?.emit(utils.StepEvents.REGISTER, step);
     },
     [_registerStep, copilotEvents]
-  );
-
-  const getCurrentStep = useCallback(
-    (key: string) => {
-      return currentStepState[key];
-    },
-    [currentStepState]
   );
 
   const moveModalToStep = useCallback(
@@ -100,11 +98,8 @@ export const CopilotProvider = ({
 
   const setCurrentStep = useCallback(
     async (key: string, step?: Step, move: boolean = true) => {
-      setCurrentStepState((prev) => ({
-        ...prev,
-        [key]: step,
-      }));
-      copilotEvents[key].emit("stepChange", step);
+      _setCurrentStep(key, step);
+      copilotEvents[key]?.emit(utils.StepEvents.STEP_CHANGE, step);
 
       if (scrollView != null) {
         const nodeHandle = findNodeHandle(scrollView);
@@ -128,7 +123,7 @@ export const CopilotProvider = ({
         scrollView != null ? 100 : 0
       );
     },
-    [copilotEvents, moveModalToStep, scrollView, setCurrentStepState]
+    [_setCurrentStep, copilotEvents, scrollView, moveModalToStep]
   );
 
   const start = useCallback(
@@ -142,7 +137,9 @@ export const CopilotProvider = ({
         setScrollView(suppliedScrollView);
       }
 
-      const currentStep = fromStep ? steps[key][fromStep] : getFirstStep(key);
+      const currentStep = fromStep
+        ? toursStore?.[key]?.steps?.[fromStep]
+        : getFirstStep(key);
 
       if (startTries.current > MAX_START_TRIES) {
         startTries.current = 0;
@@ -155,13 +152,10 @@ export const CopilotProvider = ({
           void start(key, fromStep);
         });
       } else {
-        copilotEvents[key].emit("start");
+        copilotEvents[key]?.emit(utils.StepEvents.START);
         await setCurrentStep(key, currentStep);
         await moveModalToStep(currentStep);
-        setVisibility((prev) => ({
-          ...prev,
-          [key]: true,
-        }));
+        showTour(key);
         startTries.current = 0;
       }
     },
@@ -171,20 +165,17 @@ export const CopilotProvider = ({
       moveModalToStep,
       scrollView,
       setCurrentStep,
-      setVisibility,
-      steps,
+      showTour,
+      toursStore,
     ]
   );
 
   const stop = useCallback(
     async (key: string) => {
-      setVisibility((prev) => ({
-        ...prev,
-        [key]: false,
-      }));
-      copilotEvents[key].emit("stop");
+      hideTour(key);
+      copilotEvents[key]?.emit(utils.StepEvents.STOP);
     },
-    [copilotEvents, setVisibility]
+    [copilotEvents, hideTour]
   );
 
   const next = useCallback(
@@ -211,13 +202,13 @@ export const CopilotProvider = ({
   const value = useMemo(
     () => ({
       tourKey,
+      toursStore,
+      copilotEvents,
       registerStep,
       unregisterStep,
       getCurrentStep,
       start,
       stop,
-      visible,
-      copilotEvents,
       goToNext: next,
       goToNth: nth,
       goToPrev: prev,
@@ -228,13 +219,13 @@ export const CopilotProvider = ({
     }),
     [
       tourKey,
+      toursStore,
+      copilotEvents,
       registerStep,
       unregisterStep,
       getCurrentStep,
       start,
       stop,
-      visible,
-      copilotEvents,
       next,
       nth,
       prev,

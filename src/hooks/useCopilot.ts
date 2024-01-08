@@ -20,7 +20,7 @@ export const useCopilot = (tourKey?: string): UseCopilotReturn => {
     goToNext: _goToNext,
     goToNth: _goToNth,
     goToPrev: _goToPrev,
-    visible: _visible,
+    toursStore,
     getIsFirstStep,
     getIsLastStep,
     getCurrentStepNumber,
@@ -79,7 +79,10 @@ export const useCopilot = (tourKey?: string): UseCopilotReturn => {
 
   const currentStep = useMemo(() => getCurrentStep(), [getCurrentStep]);
 
-  const visible = useMemo(() => _visible[key], [_visible, key]);
+  const visible = useMemo(
+    () => toursStore[key]?.visible ?? false,
+    [toursStore, key]
+  );
 
   const isFirstStep = useMemo(() => getIsFirstStep(key), [getIsFirstStep, key]);
   const isLastStep = useMemo(() => getIsLastStep(key), [getIsLastStep, key]);
