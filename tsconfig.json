@@ -3,11 +3,13 @@
   "exclude": ["dist"],
   "include": ["src"],
   "compilerOptions": {
+    "rootDir": ".",
     "paths": {
       "@rexfordessilfie/react-native-copilot": ["./src/index.ts"]
     },
     "types": ["react-native", "jest", "node"],
     "target": "ES2015",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noUncheckedIndexedAccess": true
   }
 }
