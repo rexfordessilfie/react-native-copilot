@@ -1,6 +1,7 @@
 import { useCallback, useContext, useMemo } from "react";
 import { CopilotContext } from "../contexts/CopilotProvider";
 import { type Step, type UseCopilotReturn } from "../types";
+import { type ScrollView } from "react-native";
 
 export const useCopilot = (tourKey?: string): UseCopilotReturn => {
   const value = useContext(CopilotContext);
@@ -29,8 +30,8 @@ export const useCopilot = (tourKey?: string): UseCopilotReturn => {
   } = value;
 
   const start = useCallback(
-    async (fromStep?: string) => {
-      void _start(key, fromStep);
+    async (fromStep?: string, scrollView?: ScrollView) => {
+      void _start(key, fromStep, scrollView);
     },
     [_start, key]
   );
