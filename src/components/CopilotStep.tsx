@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { type NativeMethods } from "react-native";
 
-import { useCopilot } from "../contexts/CopilotProvider";
+import { useCopilot } from "../hooks/useCopilot";
 
 interface Props {
+  tourKey?: string;
   name: string;
   order: number;
   text: string;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export const CopilotStep = ({
+  tourKey,
   name,
   order,
   text,
@@ -21,7 +23,7 @@ export const CopilotStep = ({
   data,
 }: Props) => {
   const registeredName = useRef<string | null>(null);
-  const { registerStep, unregisterStep } = useCopilot();
+  const { registerStep, unregisterStep } = useCopilot(tourKey);
   const wrapperRef = React.useRef<NativeMethods | null>(null);
 
   const measure = async () => {
