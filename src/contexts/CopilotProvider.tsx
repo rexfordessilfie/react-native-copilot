@@ -39,9 +39,9 @@ export const CopilotProvider = ({
   ...rest
 }: PropsWithChildren<CopilotOptions>) => {
   const startTries = useRef(0);
-  const copilotEvents = useRef<Record<utils.TourKey, Emitter<Events>>>(
-    {}
-  ).current;
+  const [copilotEvents, setCopilotEvents] = useState<
+    Record<utils.TourKey, Emitter<Events>>
+  >({});
   const modal = useRef<CopilotModalHandle | null>(null);
 
   const [scrollView, setScrollView] = useState<ScrollView | null>(null);
@@ -70,7 +70,10 @@ export const CopilotProvider = ({
       _registerStep(key, step);
 
       if (!copilotEvents[key]) {
-        copilotEvents[key] = mitt<Events>();
+        setCopilotEvents((prev) => ({
+          ...prev,
+          [key]: mitt<Events>(),
+        }));
       }
 
       copilotEvents[key]?.emit(utils.StepEvents.REGISTER, step);
